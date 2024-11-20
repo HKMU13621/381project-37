@@ -37,12 +37,17 @@ app.use('/public', express.static('public'));
 // 根路由 
 app.get('/', async (req, res) => {
     try {
-        await DatabaseHandler.connect();
-        await DatabaseHandler.disconnect();
-        //res.status(200).json({ message: 'Connected to MongoDB' }).end();
-        res.render('index', { message: 'Connected to MongoDB' });
+        let result = [];
+        
+        result = await DatabaseHandler.findDocument(Audio, {filename: "test1"});  // Corrected
+        // result = await DatabaseHandler.insertDocument(Audio, {filename: "test2", data: "test2"}); // Corrected
+        // result = await DatabaseHandler.updateDocument(Audio, {filename: "test2"}, {filename: "test3"}); // Corrected
+        // result = await DatabaseHandler.deleteDocument(Audio, {filename: "test3"}); // Corrected
+
+        res.status(200).json(result).end();
+        // res.render('index', { result: result });
     } catch (err) {
-        res.status(404).send('404 Not Found').end();
+        res.status(404).json(err.message).end();
     }
 });
 
