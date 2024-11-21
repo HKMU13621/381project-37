@@ -1,7 +1,8 @@
 # COMP S381F Group Project
-Project Topic : Music Playlist Management System
-Group No : 42
-Group Member ： Ng Chin Wa (13595298), 
+Project Topic : Music Playlist Management System  
+Group No : 42  
+Group Member ：  
+- Ng Chin Wa (13595298)
 
 ## 1. File and Folder Information
 - server.js : As the main entry point of the application, it is responsible for managing routes and handling requests, returning the corresponding JSON format data objects based on user requests. This file integrates the core logic of the application, ensuring that different API requests are correctly routed to the appropriate handling functions and providing the necessary data responses to support dynamic interactions on the front-end interface.
