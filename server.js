@@ -1,125 +1,70 @@
-// 導入依賴
+//==============================================================================================
+// dependencies setup
+
 const PORT = process.env.PORT || 8099;
 
 const express = require('express');
 const session = require('express-session');
 const formidable = require('express-formidable');
-const ffsmpeg = require('fluent-ffmpeg');
+// const ffsmpeg = require('fluent-ffmpeg');
 const passport = require('passport');// Use Passport Middleware
-const FacebookStrategy = require('passport-facebook').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // const fs = require('fs').promises;  // Correct fs.promises import at the top level
-
 const dotenv = require('dotenv');
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const unlink = util.promisify(fs.unlink);
 
-dotenv.config(); // Load environment variables
-const crypto = require('crypto');
+// const crypto = require('crypto');
 // Or use a simpler alternative without requiring crypto:
 const generateRandomState = () => Math.random().toString(36).substring(7);
 
-const GOOGLE_OAUTH_URL = process.env.GOOGLE_OAUTH_URL || 'https://accounts.google.com/o/oauth2/v2/auth';
-const GOOGLE_ACCESS_TOKEN_URL = process.env.GOOGLE_ACCESS_TOKEN_URL || 'https://oauth2.googleapis.com/token';
+const Audio = require('./models/audioModel');
+const DatabaseHandler = require('./lib/mongodbHandler');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+const FacebookStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+const { ObjectId } = require('mongodb');
+const { type } = require('os');
+
+//==============================================================================================
+// environment variables setup
+
+dotenv.config(); // Load environment variables from .env file
+
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
-const GOOGLE_CALLBACK_URL = "http%3A//localhost:8099/google/callback";
-const FACEBOOK_CALLBACK_URL = "http://localhost:8099/auth/facebook/callback";
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
+const FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL;
 
-const GOOGLE_OAUTH_SCOPES = [
 
-    "https%3A//www.googleapis.com/auth/userinfo.email",
 
-    "https%3A//www.googleapis.com/auth/userinfo.profile",
-
-];
 const facebookAuth = {
-    clientID: process.env.FACEBOOK_APP_ID || '1745361726031711',
-    clientSecret: process.env.FACEBOOK_APP_SECRET || '2815d3d8f6e411e4e125e8de3830867c',
-    callbackURL: process.env.FACEBOOK_CALLBACK_URL || 'http://localhost:8099/auth/facebook/callback'
+    clientID: FACEBOOK_APP_ID,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: FACEBOOK_CALLBACK_URL
 };
+
 const googleAuth = {
-    'clientID': GOOGLE_CLIENT_ID,
-    'clientSecret': GOOGLE_CLIENT_SECRET,
-    'callbackURL': GOOGLE_CALLBACK_URL
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: GOOGLE_CALLBACK_URL
 };
-var user = {};  // user object to be put in session
-
-// passport needs ability to serialize and unserialize users out of session
-// Passport uses serializeUser function to persist user data (after successful authentication) into session. 
-// Function deserializeUser is used to retrieve user data from session.
-passport.serializeUser(function (user, done) {
-    done(null, user);
-});
-passport.deserializeUser(function (id, done) {
-    done(null, user);
-});
-
-// passport facebook strategy
-passport.use(new FacebookStrategy({
-    "clientID": facebookAuth.clientID,
-    "clientSecret": facebookAuth.clientSecret,
-    "callbackURL": facebookAuth.callbackURL
-},
-    function (token, refreshToken, profile, done) {
-        //console.log("Facebook Profile: " + JSON.stringify(profile));
-        console.log("Facebook Profile: ");
-        console.log(profile);
-        user = {};
-        user['id'] = profile.id;
-        //user['name'] = profile.name.givenName;
-        user['name'] = profile.displayName;
-        user['type'] = profile.provider;  // Facebook? Google? Twitter?
-        console.log('user object: ' + JSON.stringify(user));
-        return done(null, user);  // put user object into session => req.user
-    })
-);
-
-passport.use(new GoogleStrategy({
-    "clientID": googleAuth.clientID,
-    "clientSecret": googleAuth.clientSecret,
-    "callbackURL": googleAuth.callbackURL,
-    passReqToCallback: true // pass request to callback
-
-},
-    function (token, refreshToken, profile, done) {
-        console.log("Google Profile: ");
-        console.log(profile);
-
-        const user = {
-            id: profile.id,
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            type: 'google'
-        };
-
-        console.log('user object: ' + JSON.stringify(user));
-        return done(null, user);
-    })
-);
 
 
-// 導入文件
-const Audio = require('./models/audioModel');
-const DatabaseHandler = require('./lib/mongodbHandler');
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
-}
-// 創建配置參數
-
-
-
-// 創建依賴實體
 const app = express();
 
-
+//==============================================================================================
+// Middleware setup
 
 // 設置模板引擎
 app.set('view engine', 'ejs');
@@ -132,141 +77,93 @@ app.use(formidable({
     maxFileSize: 50 * 1024 * 1024, // Max file size (50MB)
     multiples: true           // Allow multiple files
 }));
-app.use(session({ // 設置會話規則
-    name: 'session',
-    secret: 'COMPS381F_GROUPPROJECT',
-    keys: ['key1', 'key2', 'key3'],
+app.use(session({
+    secret: 'COMPS381F_GROUPPROJECT', 
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { secure: false } // 在生产环境中，使用 HTTPS 时应设置为 true
 }));
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/public', express.static('public'));
 
 
 
 
-
 //==============================================================================================
-// OAUTH Functions
+// OAUTH setup
 // Passport needs the following setup to save user data after authentication in the session:
 // initialize passposrt and and session for persistent login sessions
-app.use(session({
-    secret: "tHiSiSasEcRetStr",
-    resave: true,
-    saveUninitialized: true
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-// route middleware to ensure user is logged in
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated() || req.session.user){
-        req.user = req.session.user
-        return next();
-}
-    res.redirect('/login');
-}
 
 
+var user = {};  // user object to be put in session
+
+// passport needs ability to serialize and unserialize users out of session
+// Passport uses serializeUser function to persist user data (after successful authentication) into session. 
+// Function deserializeUser is used to retrieve user data from session.
 
 
+// passport facebook strategy
+passport.use(new FacebookStrategy({
+    "clientID": facebookAuth.clientID,
+    "clientSecret": facebookAuth.clientSecret,
+    "callbackURL": facebookAuth.callbackURL
+}, function (token, refreshToken, profile, done) {
+        //console.log("Facebook Profile: " + JSON.stringify(profile));
+        //console.log("Facebook Profile: ");
+        //console.log(profile);
 
-//==============================================================================================
-// send to facebook to do the authentication
-app.get("/auth/facebook", passport.authenticate("facebook", { scope: "email" }));
-// handle the callback after facebook has authenticated the user
-app.get("/auth/facebook/callback",
-    passport.authenticate("facebook", {
-        successRedirect: "/content",
-        failureRedirect: "/"
-    }));
-
-app.get("/auth/google", async (req, res) => {
-    const state = "COMPS381F_GROUPPROJECT";
-    const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
-    const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
-    res.redirect(GOOGLE_OAUTH_CONSENT_SCREEN_URL);
-});
-/* app.get('/auth/google',
-    passport.authenticate('google', {
-        scope: ['https://www.googleapis.com/auth/userinfo.profile',
-            'https://www.googleapis.com/auth/userinfo.email']
-    })
-); */
-
-app.get("/google/callback", async (req, res) => {
-    try {
-        console.log("Received callback with query:", req.query);
-
-        const { code } = req.query;
-        if (!code) {
-            return res.status(400).send("Authorization code missing");
+        const user = {
+            id: profile.id,
+            name: profile.displayName,
+            type: profile.provider
         }
 
-        const data = {
-            code,
-            client_id: GOOGLE_CLIENT_ID,
-            client_secret: GOOGLE_CLIENT_SECRET,
-            redirect_uri: "http://localhost:8099/google/callback", // Make sure port matches your server
-            grant_type: "authorization_code"
+
+        //console.log('user object: ' + JSON.stringify(user));
+        return done(null, user); 
+    })
+);
+
+passport.use(new GoogleStrategy({
+    "clientID": googleAuth.clientID,
+    "clientSecret": googleAuth.clientSecret,
+    "callbackURL": googleAuth.callbackURL
+}, function (token, refreshToken, profile, done) {
+        //console.log("Google Profile: ");
+        // console.log(profile);
+
+        const user = {
+            id: profile.id,
+            name: profile.displayName,
+            type: profile.provider
         };
 
-        console.log("Requesting token with data:", data);
+        // console.log('user object: ' + JSON.stringify(user));
+        return done(null, user);
+    })
+);
 
-        // Exchange code for tokens
-        const response = await fetch(GOOGLE_ACCESS_TOKEN_URL, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error("Token exchange failed:", errorData);
-            return res.status(response.status).send("Failed to exchange code for token");
-        }
-
-        const tokenData = await response.json();
-        console.log("Received token data:", tokenData);
-
-        // Get user info using access token
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: {
-                'Authorization': `Bearer ${tokenData.access_token}`
-            }
-        });
-
-        if (!userInfoResponse.ok) {
-            console.error("Failed to get user info:", await userInfoResponse.text());
-            return res.status(userInfoResponse.status).send("Failed to get user info");
-        }
-
-        const userInfo = await userInfoResponse.json();
-        
-        // Store user info in session
-        req.session.user = userInfo;
-        
-        // Redirect to your app's dashboard/home page
-        res.redirect('/');
-
-    } catch (error) {
-        console.error("OAuth error:", error);
-        res.status(500).send("Authentication failed");
-    }
+passport.serializeUser((user, done) => {
+    done(null, user); 
 });
 
-/* app.get('/auth/google/callback',
-    passport.authenticate('google', {
-        successRedirect: '/content',
-        failureRedirect: '/'
-    })
-); */
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+
+
+
+
 //=======================================================================================
 //DB Control part
 // Add these to your existing server.js imports
-const { ObjectId } = require('mongodb');
+
+
 
 // Handle Find Audio Files
 const handle_Find = async (req, res) => {
@@ -275,7 +172,7 @@ const handle_Find = async (req, res) => {
         res.status(200).render('list', {
             nAudios: audioFiles.length,
             audios: audioFiles,
-            user: req.user
+            user: req.session.passport.user
         });
     } catch (err) {
         console.error('Find error:', err);
@@ -330,13 +227,13 @@ const handle_Create = async (req, res) => {
         // Handle audio file upload
         if (req.files && req.files.audio_file) {
             console.log('Processing audio file:', req.files.audio_file); // Debug log
-            
+
             const file = req.files.audio_file;
             const fileData = await readFile(file.path);
             newAudio.file_data = fileData;
             newAudio.file_name = file.originalFilename || file.name;
             newAudio.file_size = file.size;
-            
+
             try {
                 await unlink(file.path);
             } catch (unlinkError) {
@@ -347,11 +244,11 @@ const handle_Create = async (req, res) => {
         // Handle cover image upload
         if (req.files && req.files.cover_image) {
             console.log('Processing cover image:', req.files.cover_image); // Debug log
-            
+
             const imageFile = req.files.cover_image;
             const imageData = await readFile(imageFile.path);
             newAudio.cover_image = imageData.toString('base64');
-            
+
             try {
                 await unlink(imageFile.path);
             } catch (unlinkError) {
@@ -362,15 +259,15 @@ const handle_Create = async (req, res) => {
         console.log('Saving audio document:', newAudio); // Debug log
 
         const result = await DatabaseHandler.insertDocument(Audio, newAudio);
-        res.status(200).render('info', { 
-            message: `Created new audio file: ${newAudio.title}`, 
-            user: req.user 
+        res.status(200).render('info', {
+            message: `Created new audio file: ${newAudio.title}`,
+            user: req.user
         });
     } catch (err) {
         console.error('Create error:', err);
-        res.status(500).render('info', { 
-            message: 'Error creating audio file: ' + err.message, 
-            user: req.user 
+        res.status(500).render('info', {
+            message: 'Error creating audio file: ' + err.message,
+            user: req.user
         });
     }
 };
@@ -396,7 +293,7 @@ const handle_Update = async (req, res, criteria) => {
             updateDoc.file_data = fileData;
             updateDoc.file_name = file.originalFilename || file.name;
             updateDoc.file_size = file.size;
-            
+
             try {
                 await unlink(file.path);
             } catch (unlinkError) {
@@ -409,7 +306,7 @@ const handle_Update = async (req, res, criteria) => {
             const imageFile = req.files.cover_image;
             const imageData = await readFile(imageFile.path);
             updateDoc.cover_image = imageData.toString('base64');
-            
+
             try {
                 await unlink(imageFile.path);
             } catch (unlinkError) {
@@ -417,8 +314,8 @@ const handle_Update = async (req, res, criteria) => {
             }
         }
 
-        console.log('Updating with:', { 
-            ...updateDoc, 
+        console.log('Updating with:', {
+            ...updateDoc,
             file_data: updateDoc.file_data ? '[FILE DATA]' : undefined,
             cover_image: updateDoc.cover_image ? '[IMAGE DATA]' : undefined
         });
@@ -429,18 +326,19 @@ const handle_Update = async (req, res, criteria) => {
             updateDoc
         );
 
-        res.status(200).render('info', { 
-            message: `Updated audio file: ${updateDoc.title}`, 
-            user: req.user 
+        res.status(200).render('info', {
+            message: `Updated audio file: ${updateDoc.title}`,
+            user: req.user
         });
     } catch (err) {
         console.error('Update error:', err);
-        res.status(500).render('info', { 
-            message: 'Error updating audio file: ' + err.message, 
-            user: req.user 
+        res.status(500).render('info', {
+            message: 'Error updating audio file: ' + err.message,
+            user: req.user
         });
     }
 };
+
 // Handle Delete Audio
 const handle_Delete = async (req, res) => {
     try {
@@ -473,25 +371,26 @@ const handle_Delete = async (req, res) => {
 
 const validateAudioFile = (req, res, next) => {
     if (!req.fields || !req.fields.title || !req.fields.artist) {
-        return res.status(400).render('info', { 
-            message: 'Title and artist are required', 
-            user: req.user 
+        return res.status(400).render('info', {
+            message: 'Title and artist are required',
+            user: req.user
         });
     }
-    
+
     if (!req.files || !req.files.audio_file) {
-        return res.status(400).render('info', { 
-            message: 'Audio file is required', 
-            user: req.user 
+        return res.status(400).render('info', {
+            message: 'Audio file is required',
+            user: req.user
         });
     }
-    
+
     next();
 };
 
 
 //=======================================================================================
-// 根路由 
+// App routes functions
+
 // app.get('/', isLoggedIn, async (req, res) => {
 //     try {
 //         let result = [];
@@ -507,13 +406,44 @@ const validateAudioFile = (req, res, next) => {
 //         res.status(404).json(err.message).end();
 //     }
 // });
+
+// route middleware to ensure user is logged in
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated() || req.session.user) {
+        return next();
+    }
+    res.redirect('/login');
+}
+
+
+
 app.get("/", isLoggedIn, function (req, res) {
     res.redirect('/content');
 });
+
 //Login Page
 app.get("/login", function (req, res) {
     res.render("login");
 });
+
+// send to facebook to do the authentication
+app.get("/auth/facebook", passport.authenticate("facebook" ,{ scope: "email", session: true }));
+// handle the callback after facebook has authenticated the user
+app.get("/auth/facebook/callback",
+    passport.authenticate("facebook", {
+        successRedirect: "/content",
+        failureRedirect: "/"
+    })
+);
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], session: true }));
+app.get('/auth/google/callback',
+    passport.authenticate('google', {
+        successRedirect: '/content',
+        failureRedirect: '/'
+    })
+);
+
 // Content/List route
 app.get("/content", isLoggedIn, async (req, res) => {
     try {
@@ -538,9 +468,9 @@ app.post('/create', isLoggedIn, validateAudioFile, async (req, res) => {
         await handle_Create(req, res);
     } catch (err) {
         console.error('Route error:', err);
-        res.status(500).render('info', { 
-            message: 'Server error during file upload', 
-            user: req.user 
+        res.status(500).render('info', {
+            message: 'Server error during file upload',
+            user: req.user
         });
     }
 });
@@ -618,6 +548,7 @@ app.get("/logout", function (req, res, next) {
         res.redirect('/login');
     });
 });
+
 // ------------------------
 // Add these routes to handle audio playback and download
 // Add route to stream audio
@@ -669,11 +600,9 @@ app.get('/download/:id', isLoggedIn, async (req, res) => {
         res.status(500).send('Error downloading file');
     }
 });
+
 //=========================
 // 啟動伺服器
-// app.listen(PORT, () => {
-//     console.log(`伺服器運行在 http://localhost:${PORT}`);
-// });
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`伺服器運行在 http://localhost:${PORT}`);
