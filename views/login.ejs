@@ -2,28 +2,60 @@
 <head>
     <title>Login</title>
     <style>
+        /* Body and container styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
         .login-container {
-            width: 300px;
-            margin: 100px auto;
-            padding: 20px;
+            background-color: #fff;
+            width: 350px;
+            padding: 40px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+
+        /* Heading */
+        h2 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        /* Login buttons */
         .login-button {
             display: block;
-            width: 100%;
-            padding: 10px;
+            width: auto;
+            padding: 12px;
             margin: 10px 0;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
-            color: white;
+            color: #fff;
+            font-size: 16px;
             font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         .facebook-btn {
             background-color: #3b5998;
         }
+        .facebook-btn:hover {
+            background-color: #2d4373;
+        }
+
         .google-btn {
             background-color: #db4437;
+        }
+        .google-btn:hover {
+            background-color: #b9372d;
         }
     </style>
 </head>
