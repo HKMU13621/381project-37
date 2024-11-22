@@ -1,0 +1,20 @@
+<html>
+    <body>
+        <H1>Welcome, <%= user.name %></H1>
+        <hr/>
+        <p>You logged in through <b><%= user.type %></b>, user ID is <%= user.id %></p>
+        <H2>Audio Files (<%= nAudios %>)</H2>
+        <ul>
+            <% for (var audio of audios) { %>
+            <li>
+                <a href="/details?_id=<%= audio._id %>">
+                    <%= audio.title %> - <%= audio.artist %>
+                </a>
+                (<%= audio.album || 'No Album' %> | <%= audio.genre || 'No Genre' %>)
+            </li>
+            <% } %>
+        </ul>
+        <a href='/create'>Upload New Audio</a>
+        <p><a href='/logout'>Logout</a></p>
+    </body>
+</html>

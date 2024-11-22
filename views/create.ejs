@@ -1,0 +1,19 @@
+<!-- create.ejs -->
+<html>
+    <body>
+        <H1>Welcome, <%= user.name %></H1>
+        <hr/>
+        <p>You logged in through <b><%= user.type %></b>, user ID is <%= user.id %></p>
+        <H2>Upload New Audio</H2>
+        <form action="/create" method="POST" enctype="multipart/form-data">
+            Title: <input name="title" required><br>
+            Artist: <input name="artist" required><br>
+            Album: <input name="album"><br>
+            Genre: <input name="genre"><br>
+            Audio File: <input type="file" name="audio_file" accept="audio/*" required><br>
+            Cover Image: <input type="file" name="cover_image" accept="image/*"><br>
+            <input type="submit" value="Upload">
+        </form>
+        <p><a href="/">Back to List</a></p>
+    </body>
+</html>

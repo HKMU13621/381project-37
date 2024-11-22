@@ -1,0 +1,33 @@
+<!-- edit.ejs -->
+<html>
+    <body>
+        <H1>Welcome, <%= user.name %></H1>
+        <hr/>
+        <p>You logged in through <b><%= user.type %></b>, user ID is <%= user.id %></p>
+        <H2>Edit Audio</H2>
+        <form action="/update" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_id" value="<%= audio._id %>">
+            Title: <input name="title" value="<%= audio.title %>" required><br>
+            Artist: <input name="artist" value="<%= audio.artist %>" required><br>
+            Album: <input name="album" value="<%= audio.album || '' %>"><br>
+            Genre: <input name="genre" value="<%= audio.genre || '' %>"><br>
+            
+            <% if (audio.file_name) { %>
+                <p>Current Audio File: <%= audio.file_name %></p>
+            <% } %>
+            New Audio File (optional): 
+            <input type="file" name="audio_file" accept="audio/*"><br>
+            
+            <% if (audio.cover_image) { %>
+                <p>Current Cover Image:</p>
+                <img src="data:image/jpeg;base64, <%= audio.cover_image %>" 
+                     style="max-width: 200px; max-height: 200px;"><br>
+            <% } %>
+            New Cover Image (optional):
+            <input type="file" name="cover_image" accept="image/*"><br>
+            
+            <input type="submit" value="Update">
+        </form>
+        <p><a href="/details?_id=<%= audio._id %>">Back to Details</a></p>
+    </body>
+</html>

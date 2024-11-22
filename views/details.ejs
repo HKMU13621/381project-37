@@ -1,0 +1,65 @@
+<!-- details.ejs -->
+<html>
+    <body>
+        <H1>Welcome, <%= user.name %></H1>
+        <hr/>
+        <p>You logged in through <b><%= user.type %></b>, user ID is <%= user.id %></p>
+        <H2>Audio Details</H2><hr>
+        <p><strong>Title:</strong> <%= audio.title %></p>
+        <p><strong>Artist:</strong> <%= audio.artist %></p>
+        <p><strong>Album:</strong> <%= audio.album || 'No Album' %></p>
+        <p><strong>Genre:</strong> <%= audio.genre || 'No Genre' %></p>
+        <p><strong>File Name:</strong> <%= audio.file_name %></p>
+        <p><strong>File Size:</strong> <%= (audio.file_size / 1024 / 1024).toFixed(2) %> MB</p>
+        
+        <% if (audio.file_data) { %>
+            <h3>Audio Player:</h3>
+            <audio controls>
+                <source src="/audio/<%= audio._id %>" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <br>
+            <a href="/download/<%= audio._id %>" class="download-btn">Download MP3</a>
+        <% } %>
+        
+        <% if (audio.cover_image) { %>
+            <h3>Cover Image:</h3>
+            <img src="data:image/jpeg;base64, <%= audio.cover_image %>" 
+                 style="max-width: 300px; max-height: 300px;"><br>
+        <% } %>
+        
+        <% if (audio.create_at) { %>
+            <p><small>Uploaded on: <%= audio.create_at.toLocaleDateString() %></small></p>
+        <% } %>
+        <% if (audio.update_at) { %>
+            <p><small>Last updated: <%= audio.update_at.toLocaleDateString() %></small></p>
+        <% } %>
+        
+        <br>
+        <div style="margin-top: 20px;">
+            <a href="/edit?_id=<%= audio._id %>">Edit</a> |
+            <a href="/delete?_id=<%= audio._id %>" 
+               onclick="return confirm('Are you sure you want to delete this audio file?')">Delete</a> |
+            <a href="/">Back to List</a>
+        </div>
+
+        <style>
+            .download-btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            .download-btn:hover {
+                background-color: #45a049;
+            }
+            audio {
+                width: 100%;
+                max-width: 500px;
+            }
+        </style>
+    </body>
+</html>

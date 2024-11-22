@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        .login-container {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .login-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        .facebook-btn {
+            background-color: #3b5998;
+        }
+        .google-btn {
+            background-color: #db4437;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Choose Login Method</h2>
+        <a href="/auth/facebook" class="login-button facebook-btn">Login with Facebook</a>
+        <a href="/auth/google" class="login-button google-btn">Login with Google</a>
+    </div>
+</body>
+</html>
