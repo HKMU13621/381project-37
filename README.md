@@ -5,6 +5,7 @@ Group Member ：
 - Lo Po Ming (13629178)
 - Ng Chin Wa (13595298)
 - Mok Tsz Lam (13557386)
+- Yu Ho Ching Washington(13712631)
 
 
 ## 1. File and Folder Information
