@@ -40,9 +40,9 @@ const GOOGLE_OAUTH_SCOPES = [
 
 ];
 const facebookAuth = {
-    'clientID': FACEBOOK_APP_ID, // facebook App ID
-    'clientSecret': FACEBOOK_APP_SECRET, // facebook App Secret
-    'callbackURL': FACEBOOK_CALLBACK_URL
+    clientID: process.env.FACEBOOK_APP_ID || '1745361726031711',
+    clientSecret: process.env.FACEBOOK_APP_SECRET || '2815d3d8f6e411e4e125e8de3830867c',
+    callbackURL: process.env.FACEBOOK_CALLBACK_URL || 'http://localhost:8099/auth/facebook/callback'
 };
 const googleAuth = {
     'clientID': GOOGLE_CLIENT_ID,
