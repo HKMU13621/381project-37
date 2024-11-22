@@ -2,6 +2,7 @@
 Project Topic : Music Playlist Management System  
 Group No : 42  
 Group Member ：  
+- Lo Po Ming (13629178)
 - Ng Chin Wa (13595298)
 
 ## 1. File and Folder Information
@@ -25,7 +26,7 @@ Group Member ：
 ## 2. Run Program Guidance
 1. Install all dependencises :
 ```
-npm install nodeman express ejs mongoose express-session express-formidable fluent-ffmpeg
+npm install
 ```
 2. Run the program :
 ```
@@ -43,7 +44,7 @@ https://
 ```
 
 ## 4. Operation guides
-- ...
+Log in to the server, then create a new music file. Everyone will be able to see the music you have uploaded
 
 
 
