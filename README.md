@@ -2,6 +2,7 @@
 Project Topic : Music Playlist Management System  
 Group No : 42  
 Group Member ：  
+- Lo Po Ming (13629178)
 - Ng Chin Wa (13595298)
 
 ## 1. File and Folder Information
