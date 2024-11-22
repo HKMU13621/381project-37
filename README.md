@@ -44,7 +44,7 @@ https://
 ```
 
 ## 4. Operation guides
-- ...
+Log in to the server, then create a new music file. Everyone will be able to see the music you have uploaded
 
 
 
