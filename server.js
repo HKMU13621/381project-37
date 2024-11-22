@@ -27,7 +27,10 @@ const GOOGLE_OAUTH_URL = process.env.GOOGLE_OAUTH_URL || 'https://accounts.googl
 const GOOGLE_ACCESS_TOKEN_URL = process.env.GOOGLE_ACCESS_TOKEN_URL || 'https://oauth2.googleapis.com/token';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
+const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 const GOOGLE_CALLBACK_URL = "http%3A//localhost:8099/google/callback";
+const FACEBOOK_CALLBACK_URL = "http://localhost:8099/auth/facebook/callback";
 
 const GOOGLE_OAUTH_SCOPES = [
 
@@ -37,9 +40,9 @@ const GOOGLE_OAUTH_SCOPES = [
 
 ];
 const facebookAuth = {
-    'clientID': '1745361726031711', // facebook App ID
-    'clientSecret': '2815d3d8f6e411e4e125e8de3830867c', // facebook App Secret
-    'callbackURL': 'http://localhost:8099/auth/facebook/callback'
+    'clientID': FACEBOOK_APP_ID, // facebook App ID
+    'clientSecret': FACEBOOK_APP_SECRET, // facebook App Secret
+    'callbackURL': FACEBOOK_CALLBACK_URL
 };
 const googleAuth = {
     'clientID': GOOGLE_CLIENT_ID,
