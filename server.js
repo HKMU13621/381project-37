@@ -671,7 +671,11 @@ app.get('/download/:id', isLoggedIn, async (req, res) => {
 });
 //=========================
 // 啟動伺服器
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//     console.log(`伺服器運行在 http://localhost:${PORT}`);
+// });
+
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`伺服器運行在 http://localhost:${PORT}`);
 });
 
