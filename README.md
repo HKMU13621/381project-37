@@ -26,7 +26,7 @@ Group Member ：
 ## 2. Run Program Guidance
 1. Install all dependencises :
 ```
-npm install nodeman express ejs mongoose express-session express-formidable fluent-ffmpeg
+npm install
 ```
 2. Run the program :
 ```
