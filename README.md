@@ -54,7 +54,6 @@ Contains all EJS templates used for rendering the front-end:
 - **`create.ejs`**: Upload new audio files.
 - **`details.ejs`**: View detailed information about an audio file, including metadata and available actions.
 - **`edit.ejs`**: Edit the audio files.
-- **`index.ejs`**: Simple index page displaying messages passed from the server.
 - **`info.ejs`**: Displays user login method and ID.
 - **`list.ejs`**: Manage and display a list of uploaded audio files.
 - **`login.ejs`**: User login page with Facebook and Google options.
