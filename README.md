@@ -19,8 +19,15 @@ Group Member ：
     - express-session
     - express-formidable
     - fluent-ffmpeg
-- uploads/* : ...
-- views/* : ...
+- uploads/* :
+- views/* :
+- create.ejs: This program is designed for the user to upload new audio files
+- details.ejs : This program is designed for the user to check a detailed view of an audio file, including its metadata and options for further actions.
+- edit.ejs : This program is designed for the user to edit their audio files.
+- index.ejs : This program is designed to create a simple index page that displays a message passed from the server.
+- info.ejs: This program is designed to show the user’s login method and ID.
+- list.ejs : This program is designed for users to manage and display a list of audio files.
+- login.ejs : This program is designed for the user option to log in using their Facebook or Google accounts.
 - models/* : 
     - audioModel.js : This file is used to generate an audio model, in which various attributes of the audio set are defined, including audio format, bit rate, duration, and volume parameters.
 - lib/* : 
