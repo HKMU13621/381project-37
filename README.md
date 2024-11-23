@@ -8,61 +8,106 @@ Group Member ：
 - Yu Ho Ching Washington(13712631)
 
 
-## 1. File and Folder Information
-- server.js : As the main entry point of the application, it is responsible for managing routes and handling requests, returning the corresponding JSON format data objects based on user requests. This file integrates the core logic of the application, ensuring that different API requests are correctly routed to the appropriate handling functions and providing the necessary data responses to support dynamic interactions on the front-end interface.
+# Audio Manager Application
 
-- package.json : Include dependencies (7) :
-    "dotenv": "^16.4.5",
-    "ejs": "^3.1.10",
-    "express": "^4.21.1",
-    "express-formidable": "^1.2.0",
-    "express-session": "^1.17.2",
-    "fluent-ffmpeg": "2.1.3",
-    "mongodb": "^6.9.0",
-    "mongoose": "^6.0.13",
-    "node-fetch": "^2.7.0",
-    "nodemon": "^2.0.15",
-    "passport": "^0.7.0",
-    "passport-facebook": "^3.0.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.0"
-- uploads/* :
-    -For the uploaded files 
-- views/* :
-    - create.ejs: This program is designed for the user to upload new audio files
-    - details.ejs : This program is designed for the user to check a detailed view of an audio file,
-      including its metadata and options for further actions.
-    - edit.ejs : This program is designed for the user to edit their audio files.
-    - index.ejs : This program is designed to create a simple index page that displays a message            passed from the server.
-    - info.ejs: This program is designed to show the user’s login method and ID.
-    - list.ejs : This program is designed for users to manage and display a list of audio files.
-    - login.ejs : This program is designed for the user option to log in using their Facebook or            Google accounts.
-- models/* : 
-    - audioModel.js : This file is used to generate an audio model, in which various attributes of the audio set are defined, including audio format, bit rate, duration, and volume parameters.
-- lib/* : 
-    - mongodbHandler.js : Used to define a series of methods for processing database query logic, aiming to simplify the process of data operations. These methods include functions for inserting, updating, deleting, and querying data, enabling developers to interact with the database efficiently.
+## Project Overview
 
-## 2. Run Program Guidance
-1. Install all dependencises :
-```
+This project is an audio management web application that allows users to upload, edit, and manage audio files. Users can log in using social media platforms such as Google or Facebook, and easily navigate through functionalities like viewing metadata, editing, and managing uploaded audio files. The application is built with Node.js, Express, MongoDB, and other supporting libraries, and it is hosted on AWS EC2 for scalability.
+
+### Project URL
+
+[https://atcitybot.com/content](https://atcitybot.com/content)
+
+---
+
+## File and Folder Structure
+
+### `server.js`
+The main entry point of the application, responsible for:
+- Managing routes and handling API requests.
+- Returning JSON-formatted data objects based on user input.
+- Integrating core application logic to route API requests to the correct handling functions and provide appropriate data responses.
+
+### `package.json`
+Contains the list of dependencies required to run the application:
+- **Core Modules**: 
+  - `express` - Server framework for managing HTTP requests.
+  - `express-formidable` - Middleware to parse form data.
+  - `express-session` - Session management.
+  - `mongoose` and `mongodb` - For database interactions.
+- **Authentication**: 
+  - `passport`, `passport-local`, `passport-google-oauth20`, `passport-facebook` - Authentication and social login strategies.
+- **Utilities**: 
+  - `dotenv` - To manage environment variables.
+  - `node-fetch` - HTTP client.
+  - `fluent-ffmpeg` - Audio file processing.
+- **Development Tools**: 
+  - `ejs` - Template engine for rendering views.
+  - `nodemon` - Live-reloading for development.
+
+### `uploads/*`
+This folder contains all the uploaded audio files.
+
+### `views/*`
+Contains all EJS templates used for rendering the front-end:
+- **`create.ejs`**: Upload new audio files.
+- **`details.ejs`**: View detailed information about an audio file, including metadata and available actions.
+- **`edit.ejs`**: Edit the audio files.
+- **`index.ejs`**: Simple index page displaying messages passed from the server.
+- **`info.ejs`**: Displays user login method and ID.
+- **`list.ejs`**: Manage and display a list of uploaded audio files.
+- **`login.ejs`**: User login page with Facebook and Google options.
+
+### `models/*`
+Contains data models for MongoDB:
+- **`audioModel.js`**: Defines the schema for audio files, including attributes like format, bit rate, duration, and volume parameters.
+
+### `lib/*`
+Contains utility libraries:
+- **`mongodbHandler.js`**: Provides methods to interact with MongoDB, simplifying operations like insert, update, delete, and query.
+
+---
+
+## Getting Started
+
+### Prerequisites
+Ensure that you have Node.js and npm installed.
+
+### Install Dependencies
+To install the necessary dependencies, run the following command:
+```sh
 npm install
 ```
-2. Run the program :
-```
-npm run dev // run with nodeman
-npm start // run normally
-```
 
-## 3. The Cloud-based Server
-The program is deployed through the AWS Cloud Server Service (EC2), which makes the application highly scalable and flexible. By utilizing the virtual servers of EC2, the development team can quickly adjust computing resources according to demand, easily handling changes in traffic, whether by increasing or decreasing server instances. In addition, the security and reliability provided by AWS ensure that the application can run in a stable environment and guarantees the security and availability of data. Such a deployment method not only improves system performance but also reduces operating costs, providing greater flexibility for enterprises to respond to changes in market demand.
+### Running the Application
+- **Development Mode (with Nodemon)**:
+  ```sh
+  npm run dev
+  ```
+- **Production Mode**:
+  ```sh
+  npm start
+  ```
 
-Project URL :
+---
 
-```
-https://atcitybot.com/content
-```
-## 4. Operation guides
-Log in to the server, then create a new music file. Everyone will be able to see the music you have uploaded
+## Deployment Details
+The application is deployed using **AWS EC2**, offering the following benefits:
+- **Scalability**: EC2 can adjust computing resources automatically to handle fluctuating traffic demands.
+- **Reliability**: The AWS infrastructure provides stable performance and high availability.
+- **Cost-Efficiency**: The server setup is designed to keep operational costs low while delivering reliable system performance.
+
+---
+
+## Usage Guide
+1. **Login**: Users can log in via Facebook or Google using the login page (`login.ejs`).
+2. **Upload Audio Files**: Navigate to the upload page to add new audio files to the system (`create.ejs`).
+3. **Manage Audio Files**: Uploaded audio files can be viewed, edited, and managed through the list and details views (`list.ejs`, `details.ejs`). All uploaded files are publicly viewable.
+
+---
+
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 
 
