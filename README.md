@@ -11,15 +11,23 @@ Group Member ：
 ## 1. File and Folder Information
 - server.js : As the main entry point of the application, it is responsible for managing routes and handling requests, returning the corresponding JSON format data objects based on user requests. This file integrates the core logic of the application, ensuring that different API requests are correctly routed to the appropriate handling functions and providing the necessary data responses to support dynamic interactions on the front-end interface.
 
-- package.json : Include dependencises (7) :
-    - nodeman
-    - express
-    - ejs
-    - mongoose
-    - express-session
-    - express-formidable
-    - fluent-ffmpeg
+- package.json : Include dependencies (7) :
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-formidable": "^1.2.0",
+    "express-session": "^1.17.2",
+    "fluent-ffmpeg": "2.1.3",
+    "mongodb": "^6.9.0",
+    "mongoose": "^6.0.13",
+    "node-fetch": "^2.7.0",
+    "nodemon": "^2.0.15",
+    "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0"
 - uploads/* :
+    -For the uploaded files 
 - views/* :
     - create.ejs: This program is designed for the user to upload new audio files
     - details.ejs : This program is designed for the user to check a detailed view of an audio file,
@@ -52,9 +60,6 @@ Project URL :
 
 ```
 https://atcitybot.com/content
-```
-```
-https://www.ncwnet.top/
 ```
 ## 4. Operation guides
 Log in to the server, then create a new music file. Everyone will be able to see the music you have uploaded
