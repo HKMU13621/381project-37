@@ -16,14 +16,14 @@ This project is an audio management web application that allows users to upload,
 
 ### Project URL
 
-[https://atcitybot.com/content](https://atcitybot.com/content)
+[https://atcitybot.com](https://atcitybot.com)
 
 ---
 
 ## File and Folder Structure
 
 ### `server.js`
-The main entry point of the application, responsible for:
+The main entry point of the application, is responsible for the following:
 - Managing routes and handling API requests.
 - Returning JSON-formatted data objects based on user input.
 - Integrating core application logic to route API requests to the correct handling functions and provide appropriate data responses.
@@ -46,7 +46,7 @@ Contains the list of dependencies required to run the application:
   - `nodemon` - Live-reloading for development.
 
 ### `uploads/*`
-This folder contains all the uploaded audio files.
+This folder contains all the uploaded audio and images files.
 
 ### `views/*`
 Contains all EJS templates used for rendering the front-end:
@@ -92,8 +92,8 @@ npm install
 ---
 
 ## Deployment Details
-The application is deployed using **AWS EC2**, offering the following benefits:
-- **Scalability**: EC2 can adjust computing resources automatically to handle fluctuating traffic demands.
+The application is deployed using **AWS Lightsail** and **Docker**, offering the following benefits:
+- **Scalability**: AWS Lightsail and Docker enable easy scaling of resources to handle fluctuating traffic demands.
 - **Reliability**: The AWS infrastructure provides stable performance and high availability.
 - **Cost-Efficiency**: The server setup is designed to keep operational costs low while delivering reliable system performance.
 
@@ -108,7 +108,3 @@ The application is deployed using **AWS EC2**, offering the following benefits:
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-
-
-
