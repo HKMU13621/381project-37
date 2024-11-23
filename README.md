@@ -1,6 +1,6 @@
 # COMP S381F Group Project
-Project Topic : Music Playlist Management System  
-Group No : 42  
+Project Topic: Music Playlist Management System  
+Group No: 42  
 Group Member ：  
 - Lo Po Ming (13629178)
 - Ng Chin Wa (13595298)
@@ -14,7 +14,6 @@ Group Member ：
 
 This project is an audio management web application that allows users to upload, edit, and manage audio files. Users can log in using social media platforms such as Google or Facebook, and easily navigate through functionalities like viewing metadata, editing, and managing uploaded audio files. The application is built with Node.js, Express, MongoDB, and other supporting libraries, and it is hosted on AWS Lightsail using Docker for scalability and flexibility.
 
-
 ### Project URL
 
 [https://atcitybot.com](https://atcitybot.com)
@@ -24,7 +23,7 @@ This project is an audio management web application that allows users to upload,
 ## File and Folder Structure
 
 ### `server.js`
-The main entry point of the application, is responsible for the following:
+The main entry point of the application, responsible for the following:
 - Managing routes and handling API requests.
 - Returning JSON-formatted data objects based on user input.
 - Integrating core application logic to route API requests to the correct handling functions and provide appropriate data responses.
@@ -47,13 +46,14 @@ Contains the list of dependencies required to run the application:
   - `nodemon` - Live-reloading for development.
 
 ### `uploads/*`
-This folder contains all the uploaded audio and images files.
+This folder contains all the uploaded audio files.
 
 ### `views/*`
 Contains all EJS templates used for rendering the front-end:
 - **`create.ejs`**: Upload new audio files.
 - **`details.ejs`**: View detailed information about an audio file, including metadata and available actions.
 - **`edit.ejs`**: Edit the audio files.
+- **`index.ejs`**: Simple index page displaying messages passed from the server.
 - **`info.ejs`**: Displays user login method and ID.
 - **`list.ejs`**: Manage and display a list of uploaded audio files.
 - **`login.ejs`**: User login page with Facebook and Google options.
@@ -96,6 +96,22 @@ The application is deployed using **AWS Lightsail** and **Docker**, offering the
 - **Scalability**: AWS Lightsail and Docker enable easy scaling of resources to handle fluctuating traffic demands.
 - **Reliability**: The AWS infrastructure provides stable performance and high availability.
 - **Cost-Efficiency**: The server setup is designed to keep operational costs low while delivering reliable system performance.
+
+### Using Docker for Deployment
+The deployment process utilizes Docker to ensure consistency across different environments. The application is containerized using **Docker** and deployed to the server using **docker-compose** for ease of management and orchestration.
+
+- **docker-compose.yml**: This file defines the services, networks, and volumes required for deploying the application. It simplifies the process of setting up and managing multi-container Docker applications.
+- **.env**: Environment variables, such as database connection strings and API keys, are stored in a `.env` file to enhance security and simplify configuration management. These variables are loaded at runtime to keep sensitive information secure and separate from the codebase.
+
+To deploy the application:
+1. Ensure Docker and Docker Compose are installed on the server.
+2. Place the `.env` file in the root directory with the appropriate environment settings.
+3. Run the following command to build and start the services:
+   ```sh
+   docker-compose up -d
+   ```
+
+This approach ensures that the deployment process is consistent and efficient, while Docker allows for easy scaling and management of the application's services.
 
 ---
 
