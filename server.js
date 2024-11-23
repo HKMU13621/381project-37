@@ -13,6 +13,10 @@ const dotenv = require('dotenv');
 // const fetch = require('node-fetch');
 const path = require('path');
 const fs = require('fs');
+if (!fs.existsSync('./uploads')) {
+    fs.mkdirSync('./uploads');
+}
+
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const unlink = util.promisify(fs.unlink);
@@ -24,9 +28,6 @@ const generateRandomState = () => Math.random().toString(36).substring(7);
 const Audio = require('./models/audioModel');
 const DatabaseHandler = require('./lib/mongodbHandler');
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
 
 const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -39,11 +40,11 @@ const { type } = require('os');
 
 dotenv.config(); // Load environment variables from .env file
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.TEST_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.TEST_GOOGLE_CLIENT_SECRET;
+const GOOGLE_CALLBACK_URL = process.env.TEST_GOOGLE_CALLBACK_URL;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
-const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 const FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL;
 
 
@@ -78,7 +79,7 @@ app.use(formidable({
     multiples: true           // Allow multiple files
 }));
 app.use(session({
-    secret: 'COMPS381F_GROUPPROJECT', 
+    secret: 'COMPS381F_GROUPPROJECT',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // 在生产环境中，使用 HTTPS 时应设置为 true
@@ -112,20 +113,20 @@ passport.use(new FacebookStrategy({
     "clientSecret": facebookAuth.clientSecret,
     "callbackURL": facebookAuth.callbackURL
 }, function (token, refreshToken, profile, done) {
-        //console.log("Facebook Profile: " + JSON.stringify(profile));
-        //console.log("Facebook Profile: ");
-        //console.log(profile);
+    //console.log("Facebook Profile: " + JSON.stringify(profile));
+    //console.log("Facebook Profile: ");
+    //console.log(profile);
 
-        const user = {
-            id: profile.id,
-            name: profile.displayName,
-            type: profile.provider
-        }
+    const user = {
+        id: profile.id,
+        name: profile.displayName,
+        type: profile.provider
+    }
 
 
-        //console.log('user object: ' + JSON.stringify(user));
-        return done(null, user); 
-    })
+    //console.log('user object: ' + JSON.stringify(user));
+    return done(null, user);
+})
 );
 
 passport.use(new GoogleStrategy({
@@ -133,22 +134,22 @@ passport.use(new GoogleStrategy({
     "clientSecret": googleAuth.clientSecret,
     "callbackURL": googleAuth.callbackURL
 }, function (token, refreshToken, profile, done) {
-        //console.log("Google Profile: ");
-        // console.log(profile);
+    //console.log("Google Profile: ");
+    // console.log(profile);
 
-        const user = {
-            id: profile.id,
-            name: profile.displayName,
-            type: profile.provider
-        };
+    const user = {
+        id: profile.id,
+        name: profile.displayName,
+        type: profile.provider
+    };
 
-        // console.log('user object: ' + JSON.stringify(user));
-        return done(null, user);
-    })
+    // console.log('user object: ' + JSON.stringify(user));
+    return done(null, user);
+})
 );
 
 passport.serializeUser((user, done) => {
-    done(null, user); 
+    done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
@@ -211,10 +212,10 @@ const handle_Edit = async (req, res, criteria) => {
 };
 
 // In handle_Create
-const handle_Create = async (req, res) => {
+const handle_Create = async (req, res, serviceType = "WEB_SERVICE") => {
     try {
 
-        console.log('Files received:', req.files); // Debug log
+        // console.log('Files received:', req.files); // Debug log
         const newAudio = {
             title: req.fields.title,
             artist: req.fields.artist,
@@ -226,10 +227,12 @@ const handle_Create = async (req, res) => {
 
         // Handle audio file upload
         if (req.files && req.files.audio_file) {
-            console.log('Processing audio file:', req.files.audio_file); // Debug log
+            
+            // console.log('Processing audio file:', req.files.audio_file); // Debug log
 
             const file = req.files.audio_file;
             const fileData = await readFile(file.path);
+            
             newAudio.file_data = fileData;
             newAudio.file_name = file.originalFilename || file.name;
             newAudio.file_size = file.size;
@@ -243,7 +246,7 @@ const handle_Create = async (req, res) => {
 
         // Handle cover image upload
         if (req.files && req.files.cover_image) {
-            console.log('Processing cover image:', req.files.cover_image); // Debug log
+            // console.log('Processing cover image:', req.files.cover_image); // Debug log
 
             const imageFile = req.files.cover_image;
             const imageData = await readFile(imageFile.path);
@@ -256,15 +259,31 @@ const handle_Create = async (req, res) => {
             }
         }
 
-        console.log('Saving audio document:', newAudio); // Debug log
+
+        // console.log('Saving audio document:', newAudio); // Debug log
 
         const result = await DatabaseHandler.insertDocument(Audio, newAudio);
-        res.status(200).render('info', {
-            message: `Created new audio file: ${newAudio.title}`,
-            user: req.user
-        });
+
+        if (serviceType === "WEB_SERVICE") {
+            res.status(200).render('info', {
+                message: `Created new audio file: ${newAudio.title}`,
+                user: req.user
+            });
+        } else if (serviceType === "RESTFUL_SERVICE") {
+            res.status(201).json(result).end();
+        }
+
     } catch (err) {
         console.error('Create error:', err);
+
+        if (fs.existsSync(uploadDir)) {
+            const files = fs.readdirSync(uploadDir);
+            for (const file of files) {
+                const filePath = path.join(uploadDir, file);
+                fs.rmSync(filePath, { recursive: true, force: true });
+            }
+        }
+
         res.status(500).render('info', {
             message: 'Error creating audio file: ' + err.message,
             user: req.user
@@ -274,7 +293,7 @@ const handle_Create = async (req, res) => {
 
 
 // In handle_Update
-const handle_Update = async (req, res, criteria) => {
+const handle_Update = async (req, res, criteria, serviceType = "WEB_SERVICE") => {
     try {
         // Only include fields that are actually being updated
         const updateDoc = {};
@@ -285,6 +304,7 @@ const handle_Update = async (req, res, criteria) => {
         if (req.fields.album) updateDoc.album = req.fields.album;
         if (req.fields.genre) updateDoc.genre = req.fields.genre;
         updateDoc.update_at = new Date();
+
 
         // Handle audio file upload only if new file is provided
         if (req.files && req.files.audio_file && req.files.audio_file.size > 0) {
@@ -313,12 +333,12 @@ const handle_Update = async (req, res, criteria) => {
                 console.error('Error deleting temporary file:', unlinkError);
             }
         }
-
-        console.log('Updating with:', {
-            ...updateDoc,
-            file_data: updateDoc.file_data ? '[FILE DATA]' : undefined,
-            cover_image: updateDoc.cover_image ? '[IMAGE DATA]' : undefined
-        });
+        
+        // console.log('Updating with:', {
+        //     ...updateDoc,
+        //     file_data: updateDoc.file_data ? '[FILE DATA]' : undefined,
+        //     cover_image: updateDoc.cover_image ? '[IMAGE DATA]' : undefined
+        // });
 
         const results = await DatabaseHandler.updateDocument(
             Audio,
@@ -326,12 +346,26 @@ const handle_Update = async (req, res, criteria) => {
             updateDoc
         );
 
-        res.status(200).render('info', {
-            message: `Updated audio file: ${updateDoc.title}`,
-            user: req.user
-        });
+        if (serviceType === "WEB_SERVICE") {
+            res.status(200).render('info', {
+                message: `Updated audio file: ${updateDoc.title}`,
+                user: req.user
+            });
+        } else if (serviceType === "RESTFUL_SERVICE") {
+            res.status(200).json(results).end();
+        }
+
     } catch (err) {
         console.error('Update error:', err);
+
+        if (fs.existsSync(uploadDir)) {
+            const files = fs.readdirSync(uploadDir);
+            for (const file of files) {
+                const filePath = path.join(uploadDir, file);
+                fs.rmSync(filePath, { recursive: true, force: true });
+            }
+        }
+
         res.status(500).render('info', {
             message: 'Error updating audio file: ' + err.message,
             user: req.user
@@ -340,25 +374,33 @@ const handle_Update = async (req, res, criteria) => {
 };
 
 // Handle Delete Audio
-const handle_Delete = async (req, res) => {
+const handle_Delete = async (req, res, criteria, serviceType = "WEB_SERVICE") => {
     try {
         const audioFile = await DatabaseHandler.findDocument(Audio, {
-            _id: new ObjectId(req.query._id)
+            _id: new ObjectId(criteria)
         });
 
         if (audioFile.length > 0) {
             await DatabaseHandler.deleteDocument(Audio, {
-                _id: new ObjectId(req.query._id)
+                _id: new ObjectId(criteria)
             });
-            res.status(200).render('info', {
-                message: `Deleted audio file: ${audioFile[0].title}`,
-                user: req.user
-            });
+            if (serviceType === "RESTFUL_SERVICE") {
+                return res.status(204).end();
+            } else if (serviceType === "WEB_SERVICE") {
+                res.status(200).render('info', {
+                    message: `Deleted audio file: ${audioFile[0].title}`,
+                    user: req.user
+                });
+            }
         } else {
-            res.status(404).render('info', {
-                message: 'Audio file not found!',
-                user: req.user
-            });
+            if (serviceType === "RESTFUL_SERVICE") {
+                return res.status(404).json({ error: 'Audio file not found' }).end();
+            } else if (serviceType === "WEB_SERVICE") {
+                res.status(404).render('info', {
+                    message: 'Audio file not found!',
+                    user: req.user
+                });
+            }
         }
     } catch (err) {
         console.error('Delete error:', err);
@@ -389,7 +431,7 @@ const validateAudioFile = (req, res, next) => {
 
 
 //=======================================================================================
-// App routes functions
+// App routes functions (Web Services)
 
 // app.get('/', isLoggedIn, async (req, res) => {
 //     try {
@@ -416,7 +458,6 @@ function isLoggedIn(req, res, next) {
 }
 
 
-
 app.get("/", isLoggedIn, function (req, res) {
     res.redirect('/content');
 });
@@ -427,7 +468,7 @@ app.get("/login", function (req, res) {
 });
 
 // send to facebook to do the authentication
-app.get("/auth/facebook", passport.authenticate("facebook" ,{ scope: "email", session: true }));
+app.get("/auth/facebook", passport.authenticate("facebook", { scope: "email", session: true }));
 // handle the callback after facebook has authenticated the user
 app.get("/auth/facebook/callback",
     passport.authenticate("facebook", {
@@ -531,7 +572,7 @@ app.post('/update', isLoggedIn, validateAudioFile, async (req, res) => {
 // Delete route
 app.get('/delete', isLoggedIn, async (req, res) => {
     try {
-        await handle_Delete(req, res);
+        await handle_Delete(req, res, req.query._id);
     } catch (err) {
         console.error("Error in delete route:", err);
         res.status(500).render('info', {
@@ -587,10 +628,14 @@ app.get('/download/:id', isLoggedIn, async (req, res) => {
             return res.status(404).send('Audio file not found');
         }
 
+        
+        // Prevent special character name errors
+        const encodedFilename = encodeURIComponent(audioFile[0].file_name);
+
         // Set headers for file download
         res.set({
             'Content-Type': 'audio/mpeg',
-            'Content-Disposition': `attachment; filename="${audioFile[0].file_name}"`,
+            'Content-Disposition': `attachment; filename="${encodedFilename}"`,
             'Content-Length': audioFile[0].file_data.length
         });
 
@@ -601,10 +646,83 @@ app.get('/download/:id', isLoggedIn, async (req, res) => {
     }
 });
 
+//=======================================================================================
+// App routes functions (Restful Services)
+
+
+// curl -X GET http://localhost:8099/api/audio
+app.get('/api/audio', async (req, res) => {
+    try {
+        const audioFiles = await DatabaseHandler.findDocument(Audio, {});
+        res.status(200).json(audioFiles).end();
+    } catch (err) {
+        console.error('Route error:', err);
+        res.status(500).json({ error: 'Server error' }).end();
+    }
+});
+
+// curl -X GET http://localhost:8099/api/audio/67418e9dbda411689c0ad4bd
+app.get('/api/audio/:id', async (req, res) => {
+    try {
+        const audioFiles = await DatabaseHandler.findDocument(Audio, { _id: new ObjectId(req.params.id) });
+        res.status(200).json(audioFiles).end();
+
+    } catch (err) {
+        console.error('Route error:', err);
+        res.status(500).json({ error: 'Server error' }).end();
+    }
+});
+
+// curl -X POST http://localhost:8099/api/audio \
+// -F "title=Test" \
+// -F "artist=Test" \
+// -F "album=Test" \
+// -F "genre=Test" \
+// -F "audio_file=@/Users/ncw500/Downloads/ROSE & Bruno Mars - APT. (Official Music Video).mp3" \
+// -F "cover_image=@/Users/ncw500/Downloads/unnamed.jpg"
+
+app.post('/api/audio', async (req, res) => {
+    try {
+        const result = await handle_Create(req, res, "RESTFUL_SERVICE");
+        res.status(200).json(result).end();
+    } catch (err) {
+        console.error('Route error:', err);
+        res.status(500).json({ error: 'Server error' }).end();
+    }
+});
+
+// curl -X PUT http://localhost:8099/api/audio/67418e9dbda411689c0ad4bd \
+// -F "title=Changed" \
+// -F "artist=Changed" \
+// -F "album=Changed" \
+// -F "genre=Changed" \
+// -F "audio_file=@/Users/ncw500/Downloads/ROSE & Bruno Mars - APT. (Official Music Video).mp3" \
+// -F "cover_image=@/Users/ncw500/Downloads/unnamed.jpg"
+app.put('/api/audio/:id', async (req, res) => {
+    try {
+        const criteria = { _id: req.params.id };
+        await handle_Update(req, res, criteria, "RESTFUL_SERVICE");
+    } catch (err) {
+        console.error('Route error:', err);
+        res.status(500).json({ error: 'Server error' }).end();
+    }
+});
+
+// curl -X DELETE http://localhost:8099/api/audio/67418e9dbda411689c0ad4bd
+app.delete('/api/audio/:id', async (req, res) => {
+    try {
+        await handle_Delete(req, res, req.params.id, "RESTFUL_SERVICE");
+    } catch (err) {
+        console.error('Route error:', err);
+        res.status(500).json({ error: 'Server error' }).end();
+    }
+});
+
+
 //=========================
 // 啟動伺服器
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`伺服器運行在 http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
 
