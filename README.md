@@ -12,7 +12,8 @@ Group Member ：
 
 ## Project Overview
 
-This project is an audio management web application that allows users to upload, edit, and manage audio files. Users can log in using social media platforms such as Google or Facebook, and easily navigate through functionalities like viewing metadata, editing, and managing uploaded audio files. The application is built with Node.js, Express, MongoDB, and other supporting libraries, and it is hosted on AWS EC2 for scalability.
+This project is an audio management web application that allows users to upload, edit, and manage audio files. Users can log in using social media platforms such as Google or Facebook, and easily navigate through functionalities like viewing metadata, editing, and managing uploaded audio files. The application is built with Node.js, Express, MongoDB, and other supporting libraries, and it is hosted on AWS Lightsail using Docker for scalability and flexibility.
+
 
 ### Project URL
 
