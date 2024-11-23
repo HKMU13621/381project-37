@@ -40,9 +40,9 @@ const { type } = require('os');
 
 dotenv.config(); // Load environment variables from .env file
 
-const GOOGLE_CLIENT_ID = process.env.TEST_GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.TEST_GOOGLE_CLIENT_SECRET;
-const GOOGLE_CALLBACK_URL = process.env.TEST_GOOGLE_CALLBACK_URL;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 const FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL;
