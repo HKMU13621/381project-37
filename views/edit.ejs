@@ -106,9 +106,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome, <%= user.name %></h1>
-        <hr />
-        <p>You logged in through <b><%= user.type %></b>, user ID is <%= user.id %></p>
         <h2>Edit Audio</h2>
         <form action="/update" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="_id" value="<%= audio._id %>">
@@ -129,7 +126,7 @@
                 <p>Current Audio File: <%= audio.file_name %></p>
             <% } %>
             <label for="audio_file">New Audio File (optional):</label>
-            <input type="file" name="audio_file" accept="audio/*"><br>
+                <input type="file" name="audio_file" accept="audio/*" max="52428800"> <!-- 50MB in bytes -->
             
             <% if (audio.cover_image) { %>
                 <p>Current Cover Image:</p>
