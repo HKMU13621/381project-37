@@ -21,10 +21,8 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const unlink = util.promisify(fs.unlink);
 
-// const crypto = require('crypto');
-// Or use a simpler alternative without requiring crypto:
-const generateRandomState = () => Math.random().toString(36).substring(7);
-
+const User = require('./models/userModel');  // Add this with your other imports
+const bcrypt = require('bcrypt');  // Don't forget to install this: npm install bcrypt
 const Audio = require('./models/audioModel');
 const DatabaseHandler = require('./lib/mongodbHandler');
 const uploadDir = path.join(__dirname, 'uploads');
@@ -82,7 +80,9 @@ app.use(session({
     secret: 'COMPS381F_GROUPPROJECT',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // 在生产环境中，使用 HTTPS 时应设置为 true
+    cookie: {         secure: false,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours}// 在生产环境中，使用 HTTPS 时应设置为 true
+     } 
 }));
 
 
@@ -167,7 +167,7 @@ passport.deserializeUser((user, done) => {
 
 
 // Handle Find Audio Files
-const handle_Find = async (req, res) => {
+/* const handle_Find = async (req, res) => {
     try {
         const audioFiles = await DatabaseHandler.findDocument(Audio, {});
         res.status(200).render('list', {
@@ -183,7 +183,33 @@ const handle_Find = async (req, res) => {
         });
     }
 };
+ */
+const handle_Find = async (req, res) => {
+    try {
+        const audioFiles = await DatabaseHandler.findDocument(Audio, {});
+        // Get user from either passport or session
+        const user = req.session.passport?.user || req.session.user;
+        
+        // console.log('Current user in handle_Find:', user); // Debug log
 
+        if (!user) {
+            return res.redirect('/login');
+        }
+
+        res.status(200).render('list', {
+            nAudios: audioFiles.length || 0,
+            audios: audioFiles || [],
+            user: user
+        });
+    } catch (err) {
+        console.error('Find error:', err);
+        const user = req.session.passport?.user || req.session.user;
+        res.status(500).render('info', {
+            message: 'Error finding audio files',
+            user: user
+        });
+    }
+};
 // Handle Edit Audio
 const handle_Edit = async (req, res, criteria) => {
     try {
@@ -451,7 +477,7 @@ const validateAudioFile = (req, res, next) => {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated() || req.session.user) {
+    if (req.isAuthenticated() || req.session || req.session.user) {
         return next();
     }
     res.redirect('/login');
@@ -466,7 +492,105 @@ app.get("/", isLoggedIn, function (req, res) {
 app.get("/login", function (req, res) {
     res.render("login");
 });
+app.get("/register", function (req, res) {
+    res.render("register");
+});
+// Update the login route
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.fields;
+        
+        // Find user
+        const users = await DatabaseHandler.findDocument(User, {
+            $or: [
+                { username: username },
+                { email: username }
+            ]
+        });
 
+        if (!users || users.length === 0) {
+            return res.render('login', { error: 'User not found' });
+        }
+
+        const user = users[0];
+
+        // Check password
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+            return res.render('login', { error: 'Invalid password' });
+        }
+
+        // Set user in session
+        req.session.user = {
+            id: user._id.toString(),
+            name: user.username,
+            type: 'local'
+        };
+
+        // Save session before redirect
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.render('login', { error: 'Login failed' });
+            }
+            // console.log('Session saved:', req.session);
+            res.redirect('/content');
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.render('login', { error: 'Login failed: ' + err.message });
+    }
+});
+// Update the registration route to also set the proper user info
+app.post('/register', async (req, res) => {
+    try {
+        const { username, email, password, confirm_password } = req.fields;
+
+        if (password !== confirm_password) {
+            return res.render('register', { error: 'Passwords do not match' });
+        }
+
+        // Check if user exists
+        const existingUser = await DatabaseHandler.findDocument(User, {
+            $or: [
+                { username: username },
+                { email: email }
+            ]
+        });
+
+        if (existingUser && existingUser.length > 0) {
+            return res.render('register', { error: 'Username or email already exists' });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = await DatabaseHandler.insertDocument(User, {
+            username,
+            email,
+            password: hashedPassword,
+            type: 'local',  // Add type field
+            created_at: new Date()
+        });
+
+        // Success message and redirect to login
+        res.render('login', { message: 'Registration successful! Please login.' });
+
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.render('register', { error: 'Registration failed' });
+    }
+});
+
+// Add a route to get user info
+app.get('/user/info', isLoggedIn, (req, res) => {
+    res.json({
+        id: req.user.id,
+        name: req.user.name,
+        type: req.user.type
+    });
+});
 // send to facebook to do the authentication
 app.get("/auth/facebook", passport.authenticate("facebook", { scope: "email", session: true }));
 // handle the callback after facebook has authenticated the user
@@ -589,6 +713,7 @@ app.get("/logout", function (req, res, next) {
         res.redirect('/login');
     });
 });
+
 
 // ------------------------
 // Add these routes to handle audio playback and download

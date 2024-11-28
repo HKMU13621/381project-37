@@ -1,28 +1,22 @@
-<!-- login.ejs -->
+<!-- register.ejs -->
 <html>
 <head>
-    <title>Login</title>
+    <title>Register</title>
     <style>
         .container {
-            max-width: 60%;
+            max-width: 400px;
             margin: 50px auto;
             padding: 20px;
             font-family: Arial, sans-serif;
         }
 
-        .login-section {
+        .register-section {
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
 
-        .social-login {
-            margin-top: 20px;
-            padding: 20px;
-            border-top: 1px solid #ddd;
-        }
-
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"] {
             width: 100%;
             padding: 8px;
             margin: 8px 0;
@@ -31,31 +25,18 @@
             box-sizing: border-box;
         }
 
-        button, .social-btn {
+        button {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-
-        button {
             background-color: #4CAF50;
             color: white;
         }
 
-        .facebook-btn {
-            background-color: #3b5998;
-            color: white;
-        }
-
-        .google-btn {
-            background-color: #db4a39;
-            color: white;
-        }
-
-        .register-link {
+        .login-link {
             text-align: center;
             margin-top: 15px;
         }
@@ -68,28 +49,30 @@
 </head>
 <body>
     <div class="container">
-        <div class="login-section">
-            <h2>Login</h2>
-            <form action="/login" method="POST">
+        <div class="register-section">
+            <h2>Register</h2>
+            <form action="/register" method="POST">
                 <div>
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username" required>
                 </div>
                 <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password" required>
                 </div>
-                <button type="submit">Login</button>
+                <div>
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit">Register</button>
             </form>
 
-            <div class="social-login">
-                <h3>Or login with:</h3>
-                <a href="/auth/facebook" class="social-btn facebook-btn">Login with Facebook</a>
-                <a href="/auth/google" class="social-btn google-btn">Login with Google</a>
-            </div>
-
-            <div class="register-link">
-                <p>Don't have an account? <a href="/register">Register here</a></p>
+            <div class="login-link">
+                <p>Already have an account? <a href="/login">Login here</a></p>
             </div>
         </div>
 
