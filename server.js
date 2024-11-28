@@ -526,6 +526,7 @@ app.post('/login', async (req, res) => {
             name: user.username,
             type: 'local'
         };
+        // console.log('Setting session user:', req.session.user); // Debug log
 
         // Save session before redirect
         req.session.save((err) => {
