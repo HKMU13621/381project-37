@@ -1,6 +1,6 @@
 # COMP S381F Group Project
 Project Topic: Music Playlist Management System  
-Group No: 42  
+Group No: 37  
 Group Member ：  
 - Lo Po Ming (13629178)
 - Ng Chin Wa (13595298)
